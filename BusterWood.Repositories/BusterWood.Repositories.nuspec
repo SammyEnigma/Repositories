@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>BusterWood.Repositories</id>
+    <version>0.1.0</version>
+    <authors>BusterWood</authors>
+    <description>SQL server database repository which supports selects, deletes, inserts, and updates</description>
+    <projectUrl>https://github.com/busterwood/repositories</projectUrl>
+    <licenseUrl>https://github.com/busterwood/repositories/blob/master/LICENSE.txt</licenseUrl>
+    <references>
+      <reference file="BusterWood.Repositories.dll" />
+    </references>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="System.Configuration" targetFramework="net45" />
+      <frameworkAssembly assemblyName="System.Data" targetFramework="net45" />
+    </frameworkAssemblies>
+    <dependencies>
+      <dependency id="BusterWood.Mapper" version="[6.0.2,7.0.0)" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="Bin\Release\BusterWood.Repositories.dll" target="lib\net45"/>
+  </files>
+</package>
