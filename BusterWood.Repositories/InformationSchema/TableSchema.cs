@@ -12,9 +12,7 @@ namespace BusterWood.Repositories.InformationSchema
         ColumnSchema identityColumn;
         ColumnSchema activeColumn;
 
-        public string Schema { get; set; }
-
-        public string Name { get; set; }
+        public Identifier Table { get; set; }
 
         public IReadOnlyList<ColumnSchema> Columns { get; set; }
 
@@ -41,7 +39,7 @@ namespace BusterWood.Repositories.InformationSchema
         public string InsertSql()
         {
             var sql = new StringBuilder(200);
-            sql.Append("INSERT INTO [").Append(Schema).Append("].[").Append(Name).Append("] (");
+            sql.Append("INSERT INTO ").Append(Table).Append(" (");
             foreach (var col in Columns.Where(c => !c.IsIdentity))
             {
                 sql.AppendLine().Append(" [").Append(col.ColumnName).Append("],");
@@ -67,7 +65,7 @@ namespace BusterWood.Repositories.InformationSchema
         public string UpdateSql()
         {
             var sql = new StringBuilder(200);
-            sql.Append("UPDATE [").Append(Schema).Append("].[").Append(Name).Append("] SET");
+            sql.Append("UPDATE ").Append(Table).Append(" SET");
             foreach (var col in Columns)
             {
                 if (col.ColumnName.Equals("ID", StringComparison.OrdinalIgnoreCase)) continue;
@@ -84,9 +82,9 @@ namespace BusterWood.Repositories.InformationSchema
         public string DeleteSql()
         {
             if (ActiveColumn == null)
-                return $"DELETE FROM [{Schema}].[{Name}] WHERE [ID] = @Id";
+                return $"DELETE FROM {Table} WHERE [ID] = @Id";
             else
-                return $"UPDATE [{Schema}].[{Name}] SET [{ActiveColumn.ColumnName}] = 0 WHERE [ID] = @Id";
+                return $"UPDATE {Table} SET [{ActiveColumn.ColumnName}] = 0 WHERE [ID] = @Id";
         }
 
         public string SelectByIdSql()
@@ -116,7 +114,7 @@ namespace BusterWood.Repositories.InformationSchema
                 sql.Append('[').Append(col.ColumnName).Append("], ");
             }
             sql.Length -= 2; // remove last comma and space
-            sql.AppendLine().Append("FROM [").Append(Schema).Append("].[").Append(Name).Append("]");
+            sql.AppendLine().Append("FROM ").Append(Table);
         }
 
     }

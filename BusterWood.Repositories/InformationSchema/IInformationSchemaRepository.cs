@@ -5,6 +5,6 @@ namespace BusterWood.Repositories.InformationSchema
 {
     public interface IInformationSchemaRepository
     {
-        Task<TableSchema> TableSchemaAsync(string schema, string table);
+        Task<TableSchema> TableSchemaAsync(Identifier table);
     }
 }

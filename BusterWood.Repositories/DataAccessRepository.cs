@@ -16,9 +16,7 @@ namespace BusterWood.Repositories
         {
             if (config == null)
                 throw new ArgumentNullException(nameof(config));
-            if (config.Schema == null)
-                throw new ArgumentException($"config {nameof(config.Schema)} must not be null (dbo maybe?)");
-            if (config.Table == null)
+            if (config.Table == Identifier.Empty)
                 throw new ArgumentException($"config {nameof(config.Table)} must not be null");
             if (connectionFactory == null)
                 throw new ArgumentNullException(nameof(connectionFactory));
@@ -26,12 +24,12 @@ namespace BusterWood.Repositories
                 throw new ArgumentNullException(nameof(infoRepository));
             this.config = config;
             this.connectionFactory = connectionFactory;
-            lazyTable = new Lazy<Task<TableSchema>>(() => infoRepository.TableSchemaAsync(config.Schema, config.Table));
+            lazyTable = new Lazy<Task<TableSchema>>(() => infoRepository.TableSchemaAsync(config.Table));
         }
 
         public async Task<List<T>> SelectAsync()
         {
-            var sql = !string.IsNullOrEmpty(config.SelectProc) ? config.SelectProc : (await lazyTable.Value).SelectSql();
+            var sql = config.SelectProc != Identifier.Empty ? (string)config.SelectProc : (await lazyTable.Value).SelectSql();
             using (var cnn = connectionFactory.Create())
             {
                 await cnn.OpenAsync();
@@ -41,7 +39,7 @@ namespace BusterWood.Repositories
 
         public List<T> Select()
         {
-            var sql = !string.IsNullOrEmpty(config.SelectProc) ? config.SelectProc : lazyTable.Value.Result.SelectSql();
+            var sql = config.SelectProc != Identifier.Empty ? (string)config.SelectProc : lazyTable.Value.Result.SelectSql();
             using (var cnn = connectionFactory.Create())
             {
                 cnn.Open();
@@ -51,7 +49,7 @@ namespace BusterWood.Repositories
 
         public async Task<T> SelectAsync(long id)
         {
-            var sql = !string.IsNullOrEmpty(config.SelectByIdProc) ? config.SelectByIdProc : (await lazyTable.Value).SelectByIdSql();
+            var sql = config.SelectByIdProc != Identifier.Empty ? (string)config.SelectByIdProc : (await lazyTable.Value).SelectByIdSql();
             using (var cnn = connectionFactory.Create())
             {
                 await cnn.OpenAsync();
@@ -61,7 +59,7 @@ namespace BusterWood.Repositories
 
         public T Select(long id)
         {
-            var sql = !string.IsNullOrEmpty(config.SelectByIdProc) ? config.SelectByIdProc : lazyTable.Value.Result.SelectByIdSql();
+            var sql = config.SelectByIdProc != Identifier.Empty ? (string)config.SelectByIdProc : lazyTable.Value.Result.SelectByIdSql();
             using (var cnn = connectionFactory.Create())
             {
                 cnn.Open();
@@ -71,7 +69,7 @@ namespace BusterWood.Repositories
 
         public async Task<bool> DeleteAsync(long id)
         {
-            var sql = !string.IsNullOrEmpty(config.DeleteProc) ? config.DeleteProc : (await lazyTable.Value).DeleteSql();
+            string sql = config.DeleteProc != Identifier.Empty ? (string)config.DeleteProc : (await lazyTable.Value).DeleteSql();
             using (var cnn = connectionFactory.Create())
             {
                 await cnn.OpenAsync();
@@ -82,7 +80,7 @@ namespace BusterWood.Repositories
 
         public bool Delete(long id)
         {
-            var sql = !string.IsNullOrEmpty(config.DeleteProc) ? config.DeleteProc : lazyTable.Value.Result.DeleteSql();
+            var sql = config.DeleteProc != Identifier.Empty ? (string)config.DeleteProc : lazyTable.Value.Result.DeleteSql();
             using (var cnn = connectionFactory.Create())
             {
                 cnn.Open();
@@ -94,7 +92,7 @@ namespace BusterWood.Repositories
         public async Task InsertAsync(T item)
         {
             var tableSchema = await lazyTable.Value;
-            var sql = !string.IsNullOrEmpty(config.InsertProc) ? config.InsertProc : tableSchema.InsertSql();
+            var sql = config.InsertProc != Identifier.Empty ? (string)config.InsertProc : tableSchema.InsertSql();
             using (var cnn = connectionFactory.Create())
             {
                 await cnn.OpenAsync();
@@ -108,7 +106,7 @@ namespace BusterWood.Repositories
         public void Insert(T item)
         {
             var tableSchema = lazyTable.Value.Result;
-            var sql = !string.IsNullOrEmpty(config.InsertProc) ? config.InsertProc : tableSchema.InsertSql();
+            var sql = config.InsertProc != Identifier.Empty ? (string)config.InsertProc : tableSchema.InsertSql();
             using (var cnn = connectionFactory.Create())
             {
                 cnn.Open();
@@ -121,7 +119,7 @@ namespace BusterWood.Repositories
 
         public async Task<bool> UpdateAsync(T item)
         {
-            var sql = !string.IsNullOrEmpty(config.UpdateProc) ? config.UpdateProc : (await lazyTable.Value).UpdateSql();
+            var sql = config.UpdateProc != Identifier.Empty ? (string)config.UpdateProc : (await lazyTable.Value).UpdateSql();
             using (var cnn = connectionFactory.Create())
             {
                 await cnn.OpenAsync();
@@ -132,7 +130,7 @@ namespace BusterWood.Repositories
 
         public bool Update(T item)
         {
-            var sql = !string.IsNullOrEmpty(config.UpdateProc) ? config.UpdateProc : lazyTable.Value.Result.UpdateSql();
+            var sql = config.UpdateProc != Identifier.Empty ? (string)config.UpdateProc : lazyTable.Value.Result.UpdateSql();
             using (var cnn = connectionFactory.Create())
             {
                 cnn.Open();
@@ -165,14 +163,13 @@ namespace BusterWood.Repositories
 
     public class RepositoryConfiguration
     {
-        public string Schema { get; set; } = "dbo";
-        public string Table { get; set; }
-        public string SelectProc { get; set; }
-        public string SelectActiveProc { get; set; }
-        public string SelectByIdProc { get; set; }
-        public string InsertProc { get; set; }
-        public string UpdateProc { get; set; }
-        public string DeleteProc { get; set; }
+        public Identifier Table { get; set; }
+        public Identifier SelectProc { get; set; }
+        public Identifier SelectActiveProc { get; set; }
+        public Identifier SelectByIdProc { get; set; }
+        public Identifier InsertProc { get; set; }
+        public Identifier UpdateProc { get; set; }
+        public Identifier DeleteProc { get; set; }
         //public string MergeProc { get; set; }
         //public string TableType { get; set; }
         //public bool InsertWithTvp { get; set; }

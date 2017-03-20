@@ -26,26 +26,24 @@ namespace BusterWood.Repositories.InformationSchema
 
             return $@"SELECT c.*, CAST(COLUMNPROPERTY(object_id(c.TABLE_NAME), c.COLUMN_NAME, 'IsIdentity') as bit) as IsIdentity
 FROM INFORMATION_SCHEMA.COLUMNS c
-WHERE c.TABLE_NAME = @table
+WHERE c.TABLE_NAME = @name
 AND c.TABLE_SCHEMA = @schema{ignored}
 ORDER BY c.ORDINAL_POSITION";
         }
 
-        public virtual async Task<TableSchema> TableSchemaAsync(string schema, string table)
+        public virtual async Task<TableSchema> TableSchemaAsync(Identifier table)
         {
-            if (string.IsNullOrWhiteSpace(schema)) throw new ArgumentNullException(nameof(schema));
-            if (string.IsNullOrWhiteSpace(table)) throw new ArgumentNullException(nameof(table));
+            if (table == Identifier.Empty) throw new ArgumentNullException(nameof(table));
 
             using (var cnn = connectionFactory.Create())
             {
                 await cnn.OpenAsync();
-                var cols = await cnn.QueryAsync(sql, new { schema, table }).ToListAsync<ColumnSchema>();
+                var cols = await cnn.QueryAsync(sql, new { table.Schema, table.Name }).ToListAsync<ColumnSchema>();
                 if (cols.Count == 0)
-                    throw new DataException($"{schema}.{table} has no columns, are you sure it exists?");
+                    throw new DataException($"{table} has no columns, are you sure it exists?");
                 return new TableSchema
                 {
-                    Schema = schema,
-                    Name = table,
+                    Table = table,
                     Columns = cols
                 };
             }

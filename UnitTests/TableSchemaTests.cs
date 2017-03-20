@@ -157,8 +157,7 @@ WHERE [ID] = @Id", sql);
         {
             return new TableSchema
             {
-                Schema = "dbo",
-                Name = "order",
+                Table = "order",
                 Columns = new[]
                 {
                     new ColumnSchema { ColumnName="id", DataType="bigint", IsIdentity=true },
@@ -172,8 +171,7 @@ WHERE [ID] = @Id", sql);
         {
             return new TableSchema
             {
-                Schema = "dbo",
-                Name = "order",
+                Table = "order",
                 Columns = new[]
                 {
                     new ColumnSchema { ColumnName="id", DataType="bigint", IsIdentity=true },
