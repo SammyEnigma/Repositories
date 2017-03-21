@@ -108,6 +108,26 @@ namespace BusterWood.Repositories
             }
         }
 
+        public List<T> SelectBy<U>(U id, string fieldName)
+        {
+            var sql = lazyTable.Value.Result.SelectByIdSql(fieldName);
+            using (var cnn = connectionFactory.Create())
+            {
+                cnn.Open();
+                return cnn.Query(sql, new { id }).ToList<T>();
+            }
+        }
+
+        public async Task<List<T>> SelectByAsync<U>(U id, string fieldName)
+        {
+            var sql = (await lazyTable.Value).SelectByIdSql(fieldName);
+            using (var cnn = connectionFactory.Create())
+            {
+                await cnn.OpenAsync();
+                return await cnn.QueryAsync(sql, new { id }).ToListAsync<T>();
+            }
+        }
+
         public async Task<bool> DeleteAsync(long id)
         {
             string sql = config.DeleteProc != Identifier.Empty ? (string)config.DeleteProc : (await lazyTable.Value).DeleteSql();

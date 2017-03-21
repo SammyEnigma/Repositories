@@ -87,11 +87,11 @@ namespace BusterWood.Repositories.InformationSchema
                 return $"UPDATE {Table} SET [{ActiveColumn.ColumnName}] = 0 WHERE [ID] = @Id";
         }
 
-        public string SelectByIdSql()
+        public string SelectByIdSql(string fieldName = "ID")
         {
             var sql = new StringBuilder(200);
             SelectCore(sql);
-            sql.AppendLine().Append("WHERE [ID] = @Id");
+            sql.AppendLine().Append("WHERE [").Append(fieldName).Append("] = @Id");
             if (ActiveColumn != null)
                 sql.AppendLine().Append("AND [").Append(ActiveColumn.ColumnName).Append("] = 1");
             return sql.ToString();
