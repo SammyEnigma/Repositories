@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace BusterWood.Repositories
 {
-    public interface IRepository<T> where T : IObjectId, new()
+    public interface IRepository<T> where T : new()
     {
         List<T> Select();
         Task<List<T>> SelectAsync();

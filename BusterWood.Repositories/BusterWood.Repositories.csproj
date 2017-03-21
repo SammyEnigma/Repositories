@@ -46,7 +46,6 @@
     <Compile Include="InformationSchema\ColumnSchema.cs" />
     <Compile Include="InformationSchema\SchemaDataAccess.cs" />
     <Compile Include="InformationSchema\TableSchema.cs" />
-    <Compile Include="IObjectId.cs" />
     <Compile Include="DataAccessRepository.cs" />
     <Compile Include="InformationSchema\IInformationSchemaRepository.cs" />
     <Compile Include="IRepository.cs" />
