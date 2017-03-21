@@ -38,14 +38,14 @@ namespace BusterWood.Repositories
             return idMember == null || idMember.Length == 0 ? null : idMember[0].Name;
         }
 
-        private static Func<T, long> GetIdFunc(string idName)
+        static Func<T, long> GetIdFunc(string idName)
         {
             var input = Expression.Parameter(typeof(T), "input");
             var val = Expression.PropertyOrField(input, idName);
             return (Func<T, long>)Expression.Lambda(typeof(Func<T, long>), val, input).Compile();
         }
 
-        private static Action<T, long> SetIdFunc(string idName)
+        static Action<T, long> SetIdFunc(string idName)
         {
             var item = Expression.Parameter(typeof(T), "item");
             var id = Expression.Parameter(typeof(long), "id");
@@ -132,26 +132,26 @@ namespace BusterWood.Repositories
 
         public async Task InsertAsync(T item)
         {
-            var tableSchema = await lazyTable.Value;
-            var sql = config.InsertProc != Identifier.Empty ? (string)config.InsertProc : tableSchema.InsertSql();
+            var sql = config.InsertProc != Identifier.Empty ? (string)config.InsertProc : (await lazyTable.Value).InsertSql();
             using (var cnn = connectionFactory.Create())
             {
                 await cnn.OpenAsync();
-                if (tableSchema.IdentityColumn != null)
+                if (SetIdAfterInsert(await lazyTable.Value))
                     SetId(item, await cnn.QueryAsync(sql, item).SingleAsync<long>());
                 else
                     await cnn.ExecuteAsync(sql, item);
             }
         }
 
+        static bool SetIdAfterInsert(TableSchema tableSchema) => tableSchema.IdentityColumn != null && SetId != null;
+
         public void Insert(T item)
         {
-            var tableSchema = lazyTable.Value.Result;
-            var sql = config.InsertProc != Identifier.Empty ? (string)config.InsertProc : tableSchema.InsertSql();
+            var sql = config.InsertProc != Identifier.Empty ? (string)config.InsertProc : lazyTable.Value.Result.InsertSql();
             using (var cnn = connectionFactory.Create())
             {
                 cnn.Open();
-                if (tableSchema.IdentityColumn != null)
+                if (lazyTable.Value.Result.IdentityColumn != null && SetId != null)
                     SetId(item, cnn.Query(sql, item).Single<long>());
                 else
                     cnn.Execute(sql, item);
@@ -182,14 +182,23 @@ namespace BusterWood.Repositories
 
         public void Save(T item)
         {
+            if (GetId == null)
+                ThrowGetIdNotSet();
             if (GetId(item) == 0)
                 Insert(item);
             else if (!Update(item))
                 ThrowUpdateFailed(item);
         }
 
+        static void ThrowGetIdNotSet()
+        {
+            throw new InvalidOperationException($"{nameof(GetId)} property is not set for type {nameof(T)}");
+        }
+
         public async Task SaveAsync(T item)
         {
+            if (GetId == null)
+                ThrowGetIdNotSet();
             if (GetId(item) == 0)
                 await InsertAsync(item);
             else if (!await UpdateAsync(item))
@@ -198,7 +207,7 @@ namespace BusterWood.Repositories
 
         void ThrowUpdateFailed(T item)
         {
-            throw new InvalidOperationException("Failed to update " + nameof(T) + " with id " + GetId(item));
+            throw new InvalidOperationException($"Failed to update {nameof(T)} with id {(GetId == null ? "?" : GetId(item).ToString())}");
         }
     }
 
