@@ -53,7 +53,12 @@ namespace BusterWood.Repositories
             return (Action<T, long>)Expression.Lambda(typeof(Action<T, long>), val, item, id).Compile();
         }
 
-        public DataAccessRepository(RepositoryConfiguration config, IDbConnectionFactory connectionFactory, IInformationSchemaRepository infoRepository)
+        public DataAccessRepository(Identifier table, IDbConnectionFactory connectionFactory, IInformationSchemaRepository infoRepository = null)
+            : this(new RepositoryConfiguration { Table = table }, connectionFactory, infoRepository)
+        {
+        }
+
+        public DataAccessRepository(RepositoryConfiguration config, IDbConnectionFactory connectionFactory, IInformationSchemaRepository infoRepository = null)
         {
             if (config == null)
                 throw new ArgumentNullException(nameof(config));
@@ -62,7 +67,7 @@ namespace BusterWood.Repositories
             if (connectionFactory == null)
                 throw new ArgumentNullException(nameof(connectionFactory));
             if (infoRepository == null)
-                throw new ArgumentNullException(nameof(infoRepository));
+                infoRepository = new SchemaDataAccess(connectionFactory);
             this.config = config;
             this.connectionFactory = connectionFactory;
             lazyTable = new Lazy<Task<TableSchema>>(() => infoRepository.TableSchemaAsync(config.Table));
