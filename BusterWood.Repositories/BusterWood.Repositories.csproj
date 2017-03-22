@@ -31,7 +31,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="BusterWood.Mapper, Version=6.0.0.0, Culture=neutral, PublicKeyToken=6bfcca4f2e08fc6b, processorArchitecture=MSIL">
-      <HintPath>..\packages\BusterWood.Mapper.6.3.0\lib\net45\BusterWood.Mapper.dll</HintPath>
+      <HintPath>..\packages\BusterWood.Mapper.6.5.0\lib\net45\BusterWood.Mapper.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />

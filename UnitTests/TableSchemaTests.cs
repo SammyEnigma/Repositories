@@ -50,7 +50,7 @@ AND [is_active] = 1", sql);
         public void creates_insert_sql_for_identity_column()
         {
             var s = TestSchema();
-            var sql = s.InsertSql();
+            var sql = s.InsertSql<Order>();
             Assert.AreEqual(@"INSERT INTO [dbo].[order] (
  [description],
  [super_region]
@@ -65,7 +65,7 @@ SELECT SCOPE_IDENTITY() as ID", sql);
         public void creates_insert_sql_for_identity_column_with_active()
         {
             var s = TestSchemaWithActive();
-            var sql = s.InsertSql();
+            var sql = s.InsertSql<Order>();
             Assert.AreEqual(@"INSERT INTO [dbo].[order] (
  [description],
  [super_region],
@@ -83,7 +83,7 @@ SELECT SCOPE_IDENTITY() as ID", sql);
         {
             var s = TestSchema();
             s.Columns[0].IsIdentity = false;
-            var sql = s.InsertSql();
+            var sql = s.InsertSql<Order>();
             Assert.AreEqual(@"INSERT INTO [dbo].[order] (
  [id],
  [description],
@@ -100,7 +100,7 @@ SELECT SCOPE_IDENTITY() as ID", sql);
         {
             var s = TestSchemaWithActive();
             s.Columns[0].IsIdentity = false;
-            var sql = s.InsertSql();
+            var sql = s.InsertSql<Order>();
             Assert.AreEqual(@"INSERT INTO [dbo].[order] (
  [id],
  [description],
@@ -118,7 +118,7 @@ SELECT SCOPE_IDENTITY() as ID", sql);
         public void creates_update_sql()
         {
             var s = TestSchema();
-            var sql = s.UpdateSql();
+            var sql = s.UpdateSql<Order>();
             Assert.AreEqual(@"UPDATE [dbo].[order] SET
  [description] = @Description,
  [super_region] = @SuperRegion
@@ -129,7 +129,7 @@ WHERE [ID] = @Id", sql);
         public void creates_update_sql_with_active_flag()
         {
             var s = TestSchemaWithActive();
-            var sql = s.UpdateSql();
+            var sql = s.UpdateSql<Order>();
             Assert.AreEqual(@"UPDATE [dbo].[order] SET
  [description] = @Description,
  [super_region] = @SuperRegion,
@@ -180,6 +180,13 @@ WHERE [ID] = @Id", sql);
                     new ColumnSchema { ColumnName="is_active", DataType="bit" },
                 }
             };
+        }
+
+        class Order
+        {
+            public long Id;
+            public string Description;
+            public int SuperRegion;
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BusterWood.Mapper;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -36,24 +37,30 @@ namespace BusterWood.Repositories.InformationSchema
             }
         }
 
-        public string InsertSql()
+        public string InsertSql<T>()
         {
+            var result = Mapping.CreateFromDestination(typeof(T), Columns); //TODO: cache the resulting SQL?
+
             var sql = new StringBuilder(200);
             sql.Append("INSERT INTO ").Append(Table).Append(" (");
-            foreach (var col in Columns.Where(c => !c.IsIdentity))
+
+            foreach (var map in result.Mapped.Where(map => map.To != IdentityColumn))
             {
-                sql.AppendLine().Append(" [").Append(col.ColumnName).Append("],");
+                sql.AppendLine().Append(" [").Append(map.To.Name).Append("],");
             }
+            if (ActiveColumn != null)
+                sql.AppendLine().Append(" [").Append(ActiveColumn.ColumnName).Append("],");
             sql.Length -= 1; // remove last comma
+
             sql.AppendLine().Append(") VALUES (");
-            foreach (var col in Columns.Where(c => !c.IsIdentity))
+            foreach (var map in result.Mapped.Where(map => map.To != IdentityColumn))
             {
-                if (col == ActiveColumn)
-                    sql.AppendLine().Append(" 1,");
-                else
-                    sql.AppendLine().Append(" @").Append(col.ClrName).Append(",");
+                sql.AppendLine().Append(" @").Append(map.From.Name).Append(",");
             }
+            if (ActiveColumn != null)
+                    sql.AppendLine().Append(" 1,");
             sql.Length -= 1; // remove last comma
+
             sql.AppendLine().Append(')');
             if (IdentityColumn != null)
             {
@@ -62,18 +69,17 @@ namespace BusterWood.Repositories.InformationSchema
             return sql.ToString();
         }
 
-        public string UpdateSql()
+        public string UpdateSql<T>()
         {
+            var result = Mapping.CreateFromDestination(typeof(T), Columns); //TODO: cache the resulting SQL?
             var sql = new StringBuilder(200);
             sql.Append("UPDATE ").Append(Table).Append(" SET");
-            foreach (var col in Columns)
+            foreach (var map in result.Mapped.Where(map => map.To != IdentityColumn))
             {
-                if (col.ColumnName.Equals("ID", StringComparison.OrdinalIgnoreCase)) continue;
-                if (col == ActiveColumn) 
-                    sql.AppendLine().Append(" [").Append(col.ColumnName).Append("] = 1,");
-                else
-                    sql.AppendLine().Append(" [").Append(col.ColumnName).Append("] = @").Append(col.ClrName).Append(",");
+                sql.AppendLine().Append(" [").Append(map.To.Name).Append("] = @").Append(map.From.Name).Append(",");
             }
+            if (ActiveColumn != null)
+                sql.AppendLine().Append(" [").Append(ActiveColumn.ColumnName).Append("] = 1,");
             sql.Length -= 1; // remove last comma
             sql.AppendLine().Append("WHERE [ID] = @Id");
             return sql.ToString();

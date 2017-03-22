@@ -157,7 +157,7 @@ namespace BusterWood.Repositories
 
         public async Task InsertAsync(T item)
         {
-            var sql = config.InsertProc != Identifier.Empty ? (string)config.InsertProc : (await lazyTable.Value).InsertSql();
+            var sql = config.InsertProc != Identifier.Empty ? (string)config.InsertProc : (await lazyTable.Value).InsertSql<T>();
             using (var cnn = connectionFactory.Create())
             {
                 await cnn.OpenAsync();
@@ -172,7 +172,7 @@ namespace BusterWood.Repositories
 
         public void Insert(T item)
         {
-            var sql = config.InsertProc != Identifier.Empty ? (string)config.InsertProc : lazyTable.Value.Result.InsertSql();
+            var sql = config.InsertProc != Identifier.Empty ? (string)config.InsertProc : lazyTable.Value.Result.InsertSql<T>();
             using (var cnn = connectionFactory.Create())
             {
                 cnn.Open();
@@ -185,7 +185,7 @@ namespace BusterWood.Repositories
 
         public async Task<bool> UpdateAsync(T item)
         {
-            var sql = config.UpdateProc != Identifier.Empty ? (string)config.UpdateProc : (await lazyTable.Value).UpdateSql();
+            var sql = config.UpdateProc != Identifier.Empty ? (string)config.UpdateProc : (await lazyTable.Value).UpdateSql<T>();
             using (var cnn = connectionFactory.Create())
             {
                 await cnn.OpenAsync();
@@ -196,7 +196,7 @@ namespace BusterWood.Repositories
 
         public bool Update(T item)
         {
-            var sql = config.UpdateProc != Identifier.Empty ? (string)config.UpdateProc : lazyTable.Value.Result.UpdateSql();
+            var sql = config.UpdateProc != Identifier.Empty ? (string)config.UpdateProc : lazyTable.Value.Result.UpdateSql<T>();
             using (var cnn = connectionFactory.Create())
             {
                 cnn.Open();

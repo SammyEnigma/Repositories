@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>BusterWood.Repositories</id>
-    <version>0.5.0</version>
+    <version>0.6.0</version>
     <authors>BusterWood</authors>
     <description>SQL server database repository which supports selects, deletes, inserts, and updates</description>
     <projectUrl>https://github.com/busterwood/repositories</projectUrl>
@@ -15,7 +15,7 @@
       <frameworkAssembly assemblyName="System.Data" targetFramework="net45" />
     </frameworkAssemblies>
     <dependencies>
-      <dependency id="BusterWood.Mapper" version="[6.0.2,7.0.0)" />
+      <dependency id="BusterWood.Mapper" version="[6.5.0,7.0.0)" />
     </dependencies>
   </metadata>
   <files>

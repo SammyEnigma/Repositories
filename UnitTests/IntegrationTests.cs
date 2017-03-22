@@ -21,7 +21,7 @@ namespace UnitTests
         {
             connectionFactory = new ConfiguredSqlConnectionFactory("dev");
             var infoRepo = new SchemaDataAccess(connectionFactory);
-            var config = new RepositoryConfiguration { Schema="dbo", Table = "REGION" };
+            var config = new RepositoryConfiguration { Table = new Identifier("dbo", "REGION") };
             repo = new DataAccessRepository<Region>(config, connectionFactory, infoRepo);
         }
 
@@ -150,12 +150,31 @@ namespace UnitTests
                 Assert.IsFalse(await repo.UpdateAsync(before));
             }
         }
+
+        [Test]
+        public void can_select_by_string()
+        {
+            var found = repo.SelectBy("UX", "ISO_CODE");
+            Assert.IsNotNull(found);
+            Assert.AreEqual(1, found.Count);
+            Assert.AreEqual("UX", found[0].Isocode);
+        }
+
+        [Test]
+        public async Task can_select_by_string_async()
+        {
+            var found = await repo.SelectByAsync("UX", "ISO_CODE");
+            Assert.IsNotNull(found);
+            Assert.AreEqual(1, found.Count);
+            Assert.AreEqual("UX", found[0].Isocode);
+        }
+
     }
 
     abstract class Audited
     {
         public int AuditVersion { get; set; }
-        public char AuditType { get; set; }
+        public string AuditType { get; set; }
         public DateTime AuditDateTime { get; set; }
         public string AuditUser { get; set; }
         public string AuditMachine { get; set; }
@@ -163,7 +182,7 @@ namespace UnitTests
         public string AuditSource { get; set; }
     }
 
-    class Region : Audited, IObjectId
+    class Region : Audited
     {
         public long Id { get; set; }
         public string RegionName { get; set; }

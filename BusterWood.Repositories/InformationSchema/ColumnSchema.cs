@@ -1,7 +1,10 @@
-﻿namespace BusterWood.Repositories.InformationSchema
+﻿using System;
+using BusterWood.Mapper;
+
+namespace BusterWood.Repositories.InformationSchema
 {
 
-    public class ColumnSchema
+    public class ColumnSchema : Thing
     {
         public string ColumnName { get; set; }
         public int OrdinalPosition { get; set; }
@@ -26,5 +29,11 @@
                 return clrName;
             }
         }
+
+        string Thing.ComparisonName => ColumnName.Replace("_", "");
+
+        string Thing.Name => ColumnName;
+
+        Type Thing.Type => Types.TypeFromSqlTypeName(DataType);
     }
 }
